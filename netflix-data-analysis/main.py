@@ -11,7 +11,7 @@ def flatten_list(list):
     return [item for sublist in list for item in sublist]
 
 
-df = pd.read_csv('data/netflix_titles.csv')
+df = pd.read_csv('../data/netflix_titles.csv')
 type_counts = df['type'].value_counts()
 director_counts = df['director'].value_counts()
 ccast = Series(flatten_list([x.split(', ') for x in df.cast.dropna()]))

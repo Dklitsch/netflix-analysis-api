@@ -18,25 +18,25 @@ ccast = Series(flatten_list([x.split(', ') for x in df.cast.dropna()]))
 ccast_counts = ccast.value_counts()
 
 
-@APP.route('/')
+@app.route('/')
 def index():
     return df.to_json(orient='records', force_ascii=False)
 
 
-@APP.route('/type')
+@app.route('/type')
 def title_type():
     return type_counts.to_json(force_ascii=False)
 
 
-@APP.route('/director/top5')
+@app.route('/director/top5')
 def director_top5():
     return director_counts[:5].to_json(orient='columns', force_ascii=False)
 
 
-@APP.route('/cast/top5')
+@app.route('/cast/top5')
 def cast_top5():
     return ccast_counts[:5].to_json(orient='columns', force_ascii=False)
 
 
 if __name__ == '__main__':
-    APP.run(port=80)
+    app.run(port=80)

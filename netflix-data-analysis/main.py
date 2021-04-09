@@ -39,4 +39,4 @@ def cast_top5():
 
 
 if __name__ == '__main__':
-    APP.run()
+    APP.run(port=80)

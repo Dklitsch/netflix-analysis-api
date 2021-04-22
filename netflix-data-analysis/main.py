@@ -36,19 +36,23 @@ def index():
 @app.route('/movie')
 @cross_origin()
 def movie():
-    if 'order' in request.form and request.form['order'] == 'desc' and 'take' in request.form:
-        return df[df['type'] == 'Movie'].sort_values(by="release_year").title[:request.form['take']].to_json(orient='records', force_ascii=False)
+    if 'order' in request.form and 'take' in request.form:
+        sort_ascending = request.form['order'] == 'asc'
+        result = df[df['type'] == 'Movie'].sort_values(by="release_year", ascending=sort_ascending).title[:request.form['take']]
+        return result.to_json(orient='records', force_ascii=False)
     else:
-        return df.to_json(orient='records', force_ascii=False)
+        return df[df['type'] == 'Movie'].to_json(orient='records', force_ascii=False)
 
 
 @app.route('/tvshow')
 @cross_origin()
 def tv_show():
-    if 'order' in request.form and request.form['order'] == 'desc' and 'take' in request.form:
-        return df[df['type'] == 'Movie'].sort_values(by="release_year").title[:request.form['take']].to_json(orient='records', force_ascii=False)
+    if 'order' in request.form and 'take' in request.form:
+        sort_ascending = request.form['order'] == 'asc'
+        result = df[df['type'] == 'TV Show'].sort_values(by="release_year", ascending=sort_ascending).title[:request.form['take']]
+        return result.to_json(orient='records', force_ascii=False)
     else:
-        return df.to_json(orient='records', force_ascii=False)
+        return df[df['type'] == 'TV Show'].to_json(orient='records', force_ascii=False)
 
 
 @app.route('/type')

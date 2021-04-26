@@ -36,22 +36,30 @@ def index():
 @app.route('/movie')
 @cross_origin()
 def movie():
-    if 'order' in request.form and 'take' in request.form:
-        sort_ascending = request.form['order'] != 'desc'
-        result = df[df['type'] == 'Movie'].sort_values(by="release_year", ascending=sort_ascending).title[:request.form['take']]
-        return result.to_json(orient='records', force_ascii=False)
-    else:
+    try:
+        take = int(request.form['take'])
+        if 'order' in request.form and 'take' in request.form:
+            sort_ascending = request.form['order'] != 'desc'
+            result = df[df['type'] == 'Movie'].sort_values(by="release_year", ascending=sort_ascending).title[:take]
+            return result.to_json(orient='records', force_ascii=False)
+        else:
+            return df[df['type'] == 'Movie'].to_json(orient='records', force_ascii=False)
+    except ValueError as e:
         return df[df['type'] == 'Movie'].to_json(orient='records', force_ascii=False)
 
 
 @app.route('/tvshow')
 @cross_origin()
 def tv_show():
-    if 'order' in request.form and 'take' in request.form:
-        sort_ascending = request.form['order'] != 'desc'
-        result = df[df['type'] == 'TV Show'].sort_values(by="release_year", ascending=sort_ascending).title[:request.form['take']]
-        return result.to_json(orient='records', force_ascii=False)
-    else:
+    try:
+        take = int(request.form['take'])
+        if 'order' in request.form and 'take' in request.form:
+            sort_ascending = request.form['order'] != 'desc'
+            result = df[df['type'] == 'TV Show'].sort_values(by="release_year", ascending=sort_ascending).title[:take]
+            return result.to_json(orient='records', force_ascii=False)
+        else:
+            return df[df['type'] == 'TV Show'].to_json(orient='records', force_ascii=False)
+    except ValueError as e:
         return df[df['type'] == 'TV Show'].to_json(orient='records', force_ascii=False)
 
 

@@ -37,9 +37,9 @@ def index():
 @cross_origin()
 def movie():
     try:
-        if 'order' in request.form and 'take' in request.form:
-            take = int(request.form['take'])
-            sort_ascending = request.form['order'] != 'desc'
+        if request.args.get('order') and request.args.get('take'):
+            take = int(request.args.get('take'))
+            sort_ascending = request.args.get('order') != 'desc'
             result = df[df['type'] == 'Movie'].sort_values(by="release_year", ascending=sort_ascending)[:take]
             return result.to_json(orient='records', force_ascii=False)
         else:
@@ -52,9 +52,9 @@ def movie():
 @cross_origin()
 def tv_show():
     try:
-        if 'order' in request.form and 'take' in request.form:
-            take = int(request.form['take'])
-            sort_ascending = request.form['order'] != 'desc'
+        if request.args.get('order') and request.args.get('take'):
+            take = int(request.args.get('take'))
+            sort_ascending = request.args.get('order') != 'desc'
             result = df[df['type'] == 'TV Show'].sort_values(by="release_year", ascending=sort_ascending)[:take]
             return result.to_json(orient='records', force_ascii=False)
         else:

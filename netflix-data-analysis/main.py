@@ -40,7 +40,7 @@ def movie():
         if 'order' in request.form and 'take' in request.form:
             take = int(request.form['take'])
             sort_ascending = request.form['order'] != 'desc'
-            result = df[df['type'] == 'Movie'].sort_values(by="release_year", ascending=sort_ascending).title[:take]
+            result = df[df['type'] == 'Movie'].sort_values(by="release_year", ascending=sort_ascending)[:take]
             return result.to_json(orient='records', force_ascii=False)
         else:
             return df[df['type'] == 'Movie'].to_json(orient='records', force_ascii=False)
@@ -55,7 +55,7 @@ def tv_show():
         if 'order' in request.form and 'take' in request.form:
             take = int(request.form['take'])
             sort_ascending = request.form['order'] != 'desc'
-            result = df[df['type'] == 'TV Show'].sort_values(by="release_year", ascending=sort_ascending).title[:take]
+            result = df[df['type'] == 'TV Show'].sort_values(by="release_year", ascending=sort_ascending)[:take]
             return result.to_json(orient='records', force_ascii=False)
         else:
             return df[df['type'] == 'TV Show'].to_json(orient='records', force_ascii=False)

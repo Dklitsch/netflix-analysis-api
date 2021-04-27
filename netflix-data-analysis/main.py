@@ -1,3 +1,5 @@
+import json
+
 import flask
 from flask import request
 import pandas as pd
@@ -5,6 +7,7 @@ import numpy as np
 from pandas import DataFrame, Series
 from flask_cors import CORS, cross_origin
 import sys
+from flask import jsonify
 
 # Create the application.
 app = flask.Flask(__name__)
@@ -73,6 +76,18 @@ def title_type():
 @cross_origin()
 def director_top5():
     return director_counts[:5].to_json(orient='columns', force_ascii=False)
+
+
+@app.route('/director/<name>')
+@cross_origin()
+def director(name):
+    titles = df[df.director.str.contains(name, na=False, case=False) == True]
+    collabs = Series(flatten_list([x.split(', ') for x in titles.director]))
+    result = {
+        'titles': titles[['title', 'country', 'release_year']].to_dict(orient='records'),
+        'director_collabs': collabs[collabs.str.contains(name) == False].value_counts().to_dict()
+    }
+    return jsonify(result)
 
 
 @app.route('/cast/top5')

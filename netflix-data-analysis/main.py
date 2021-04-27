@@ -83,9 +83,11 @@ def director_top5():
 def director(name):
     titles = df[df.director.str.contains(name, na=False, case=False) == True]
     collabs = Series(flatten_list([x.split(', ') for x in titles.director]))
+    cast_collabs = Series(flatten_list([x.split(', ') for x in titles.cast])).value_counts()
     result = {
         'titles': titles[['title', 'country', 'release_year']].to_dict(orient='records'),
-        'director_collabs': collabs[collabs.str.contains(name) == False].value_counts().to_dict()
+        'director_collabs': collabs[collabs.str.contains(name) == False].value_counts().to_dict(),
+        'cast_collabs': cast_collabs[cast_collabs > 1].to_dict()
     }
     return jsonify(result)
 

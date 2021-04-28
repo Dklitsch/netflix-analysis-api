@@ -88,8 +88,8 @@ def director(name):
     cast_collabs = Series(flatten_list([x.split(', ') for x in titles.cast])).value_counts()
     result = {
         'titles': titles[['title', 'country', 'release_year']].sort_values(by="release_year").to_dict(orient='records'),
-        'director_collabs': director_collabs.sort_values(ascending=False).to_dict(),
-        'cast_collabs': cast_collabs[cast_collabs > 1].sort_values(ascending=False).to_dict()
+        'director collabs': director_collabs.sort_values(ascending=False).to_dict(),
+        'cast collabs': cast_collabs[cast_collabs > 1].sort_values(ascending=False).to_dict()
     }
     return jsonify(result)
 

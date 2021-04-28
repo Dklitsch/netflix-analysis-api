@@ -11,6 +11,7 @@ from flask import jsonify
 
 # Create the application.
 app = flask.Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 cors = CORS(app)
 
 
@@ -33,7 +34,7 @@ def index():
     if 'order' in request.form and request.form['order'] == 'desc' and 'take' in request.form:
         return df.sort_values(by="release_year").title[:request.form['take']].to_json(orient='records', force_ascii=False)
     else:
-        return df.to_json(orient='records', force_ascii=False)
+        return jsonify(df.to_dict(orient='records'))
 
 
 @app.route('/movie')
@@ -85,7 +86,7 @@ def director(name):
     collabs = Series(flatten_list([x.split(', ') for x in titles.director]))
     cast_collabs = Series(flatten_list([x.split(', ') for x in titles.cast])).value_counts()
     result = {
-        'titles': titles[['title', 'country', 'release_year']].to_dict(orient='records'),
+        'titles': titles[['title', 'country', 'release_year']].sort_values(by="release_year").to_dict(orient='records'),
         'director_collabs': collabs[collabs.str.contains(name) == False].value_counts().to_dict(),
         'cast_collabs': cast_collabs[cast_collabs > 1].to_dict()
     }

@@ -8,6 +8,7 @@ from pandas import DataFrame, Series
 from flask_cors import CORS, cross_origin
 import sys
 from flask import jsonify
+import math
 
 # Create the application.
 app = flask.Flask(__name__)
@@ -27,7 +28,6 @@ ccast_counts = ccast.value_counts()
 countries_counts = Series(flatten_list([x.split(', ') for x in df.country.dropna()])).value_counts()
 listed_in_counts = Series(flatten_list([x.split(', ') for x in df.listed_in.dropna()])).value_counts()
 
-
 @app.route('/')
 @cross_origin()
 def index():
@@ -35,6 +35,12 @@ def index():
         return df.sort_values(by="release_year").title[:request.form['take']].to_json(orient='records', force_ascii=False)
     else:
         return jsonify(df.to_dict(orient='records'))
+
+
+@app.route('/searchterms')
+@cross_origin()
+def search_terms():
+    return jsonify([{"term": x, "type": "director"} for x in df.director.dropna()])
 
 
 @app.route('/movie')

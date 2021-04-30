@@ -40,8 +40,8 @@ def index():
 @app.route('/searchterms')
 @cross_origin()
 def search_terms():
-    directorNames = Series(flatten_list([x.split(', ') for x in df.director.dropna()]))
-    return jsonify([{"term": x, "type": "director"} for x in directorNames])
+    director_names = Series(flatten_list([x.split(', ') for x in df.director.dropna()])).unique()
+    return jsonify([{"term": x, "type": "director"} for x in director_names])
 
 
 @app.route('/movie')

@@ -1,14 +1,14 @@
 import json
 
 import flask
-from flask import request
+from flask import request, Response, jsonify
 import pandas as pd
 import numpy as np
 from pandas import DataFrame, Series
 from flask_cors import CORS, cross_origin
 import sys
-from flask import jsonify
 import math
+from collections import OrderedDict
 
 # Create the application.
 app = flask.Flask(__name__)
@@ -88,23 +88,88 @@ def director_top5():
 
 @app.route('/director/<name>')
 @cross_origin()
-def director(name):
+def director_detail(name):
     titles = df[df.director.str.contains(name, na=False, case=False) == True]
-    collabs = Series(flatten_list([x.split(', ') for x in titles.director]))
-    director_collabs = collabs[collabs.str.contains(name, na=False, case=False) == False].value_counts()
-    cast_collabs = Series(flatten_list([x.split(', ') for x in titles.cast])).value_counts()
+    collabs = Series(flatten_list([str(x).split(', ') for x in titles.director]))
+    director_collabs = collabs[collabs.str.contains(name, na=False, case=False) == False].value_counts(sort=True, ascending=False)
+    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast])).value_counts(sort=True, ascending=False)
     result = {
         'titles': titles[['title', 'country', 'release_year']].sort_values(by="release_year").to_dict(orient='records'),
-        'director collabs': director_collabs.sort_values(ascending=False).to_dict(),
-        'cast collabs': cast_collabs[cast_collabs > 1].sort_values(ascending=False).to_dict()
+        'director collabs': director_collabs[director_collabs > 1].apply(OrderedDict),
+        'cast collabs': cast_collabs[cast_collabs > 1].apply(OrderedDict)
     }
     return jsonify(result)
+
+
+@app.route('/stg/director/<name>')
+@cross_origin()
+def director_detail_stage(name):
+    titles = df[df.director.str.contains(name, na=False, case=False) == True]
+    result = titles[['title', 'country', 'release_year']].sort_values(by="release_year")
+    return jsonify(result.to_dict(orient='records'))
+
+
+@app.route('/director/<name>/director collabs')
+@cross_origin()
+def director_detail_director_collabs(name):
+    titles = df[df.director.str.contains(name, na=False, case=False) == True]
+    collabs = Series(flatten_list([str(x).split(', ') for x in titles.director]))
+    director_collabs = collabs[collabs.str.contains(name, na=False, case=False) == False].value_counts(sort=True, ascending=True)
+    return Response(director_collabs[director_collabs > 1].to_json(), mimetype='application/json')
+
+
+@app.route('/director/<name>/cast collabs')
+@cross_origin()
+def director_detail_cast_collabs(name):
+    titles = df[df.director.str.contains(name, na=False, case=False) == True]
+    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast])).value_counts(sort=True, ascending=True)
+    return Response(cast_collabs[cast_collabs > 1].to_json(), mimetype='application/json')
 
 
 @app.route('/cast/top5')
 @cross_origin()
 def cast_top5():
     return ccast_counts[:5].to_json(orient='columns', force_ascii=False)
+
+
+@app.route('/cast/<name>')
+@cross_origin()
+def cast_detail(name):
+    titles = df[df.cast.str.contains(name, na=False, case=False) == True]
+    collabs = Series(flatten_list([str(x).split(', ') for x in titles.director]))
+    director_collabs = collabs[collabs.str.contains(name, na=False, case=False) == False].value_counts(sort=True, ascending=True)
+    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast])).value_counts(sort=True, ascending=True)
+    result = {
+        'titles': titles[['title', 'country', 'release_year']].sort_values(by="release_year").to_dict(orient='records'),
+        'director collabs': director_collabs[director_collabs > 1].to_dict(),
+        'cast collabs': cast_collabs[cast_collabs > 1].to_dict()
+    }
+    return Response(cast_collabs[cast_collabs > 1].to_json(), mimetype='application/json')
+
+
+@app.route('/stg/cast/<name>')
+@cross_origin()
+def cast_detail_stage(name):
+    titles = df[df.cast.str.contains(name, na=False, case=False) == True]
+    result = titles[['title', 'country', 'release_year']].sort_values(by="release_year").to_dict(orient='records')
+    return jsonify(result)
+
+
+@app.route('/cast/<name>/director collabs')
+@cross_origin()
+def cast_detail_director_collabs(name):
+    titles = df[df.cast.str.contains(name, na=False, case=False) == True]
+    collabs = Series(flatten_list([str(x).split(', ') for x in titles.director]))
+    director_collabs = collabs[collabs.str.contains(name, na=False, case=False) == False].value_counts(sort=True, ascending=True)
+    return Response(director_collabs[director_collabs > 1].to_json(), mimetype='application/json')
+
+
+@app.route('/cast/<name>/cast collabs')
+@cross_origin()
+def cast_detail_cast_collabs(name):
+    titles = df[df.cast.str.contains(name, na=False, case=False) == True]
+    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast])).value_counts(sort=True, ascending=True)
+    return Response(cast_collabs[cast_collabs > 1].to_json(), mimetype='application/json')
 
 
 @app.route('/country/top10')

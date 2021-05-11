@@ -45,7 +45,7 @@ def search_terms():
     return jsonify(director_terms)
 
 
-@app.route('/searchterms/<term>')
+@app.route('/stg/searchterms/<term>')
 @cross_origin()
 def search_terms_stg(term):
     director_names = Series(flatten_list([x.split(', ') for x in df.director.dropna()]))

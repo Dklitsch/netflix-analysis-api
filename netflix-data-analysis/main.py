@@ -42,9 +42,20 @@ def index():
 def search_terms():
     director_names = Series(flatten_list([x.split(', ') for x in df.director.dropna()])).unique()
     director_terms = [{"term": x, "type": "director"} for x in director_names]
-    cast_names = Series(flatten_list([x.split(', ') for x in df.cast.dropna()])).unique()
-    cast_terms = [{"term": x, "type": "cast"} for x in cast_names]
     return jsonify(director_terms)
+
+
+@app.route('/searchterms/<term>')
+@cross_origin()
+def search_terms_stg(term):
+    director_names = Series(flatten_list([x.split(', ') for x in df.director.dropna()]))
+    filtered_directors = director_names[director_names.str.contains(term, na=False, case=False) == True].unique()
+    director_terms = [{"term": x, "type": "director"} for x in filtered_directors]
+
+    cast_names = Series(flatten_list([x.split(', ') for x in df.cast.dropna()]))
+    filtered_cast = cast_names[cast_names.str.contains(term, na=False, case=False) == True].unique()
+    cast_terms = [{"term": x, "type": "cast"} for x in filtered_cast]
+    return jsonify(director_terms + cast_terms)
 
 
 @app.route('/movie')

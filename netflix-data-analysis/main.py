@@ -37,15 +37,7 @@ def index():
         return jsonify(df.to_dict(orient='records'))
 
 
-@app.route('/searchterms')
-@cross_origin()
-def search_terms():
-    director_names = Series(flatten_list([x.split(', ') for x in df.director.dropna()])).unique()
-    director_terms = [{"term": x, "type": "director"} for x in director_names]
-    return jsonify(director_terms)
-
-
-@app.route('/stg/searchterms/<term>')
+@app.route('/searchterms/<term>')
 @cross_origin()
 def search_terms_stg(term):
     director_names = Series(flatten_list([x.split(', ') for x in df.director.dropna()]))

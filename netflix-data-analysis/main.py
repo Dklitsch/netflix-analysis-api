@@ -99,7 +99,7 @@ def director_detail(name):
 def director_detail_director_collabs(name):
     titles = df[df.director.str.contains(name, na=False, case=False) == True]
     collabs = Series(flatten_list([str(x).split(', ') for x in titles.director]))
-    director_collabs = collabs[collabs.str.contains(name, na=False, case=False) == False].value_counts(sort=True, ascending=True)
+    director_collabs = collabs[collabs.str.contains(name, na=False, case=False) == False].value_counts(sort=True)
     return Response(director_collabs[director_collabs > 1].to_json(), mimetype='application/json')
 
 
@@ -107,7 +107,7 @@ def director_detail_director_collabs(name):
 @cross_origin()
 def director_detail_cast_collabs(name):
     titles = df[df.director.str.contains(name, na=False, case=False) == True]
-    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast])).value_counts(sort=True, ascending=True)
+    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast])).value_counts(sort=True)
     return Response(cast_collabs[cast_collabs > 1].to_json(), mimetype='application/json')
 
 
@@ -130,7 +130,7 @@ def cast_detail_stage(name):
 def cast_detail_director_collabs(name):
     titles = df[df.cast.str.contains(name, na=False, case=False) == True]
     collabs = Series(flatten_list([str(x).split(', ') for x in titles.director]))
-    director_collabs = collabs[collabs.str.contains(name, na=False, case=False) == False].value_counts(sort=True, ascending=True)
+    director_collabs = collabs[collabs.str.contains(name, na=False, case=False) == False].value_counts(sort=True)
     return Response(director_collabs[director_collabs > 1].to_json(), mimetype='application/json')
 
 
@@ -138,7 +138,7 @@ def cast_detail_director_collabs(name):
 @cross_origin()
 def cast_detail_cast_collabs(name):
     titles = df[df.cast.str.contains(name, na=False, case=False) == True]
-    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast])).value_counts(sort=True, ascending=True)
+    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast])).value_counts(sort=True)
     return Response(cast_collabs[cast_collabs > 1].to_json(), mimetype='application/json')
 
 

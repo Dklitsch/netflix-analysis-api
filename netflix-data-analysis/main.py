@@ -90,21 +90,6 @@ def director_top5():
 @cross_origin()
 def director_detail(name):
     titles = df[df.director.str.contains(name, na=False, case=False) == True]
-    collabs = Series(flatten_list([str(x).split(', ') for x in titles.director]))
-    director_collabs = collabs[collabs.str.contains(name, na=False, case=False) == False].value_counts(sort=True, ascending=False)
-    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast])).value_counts(sort=True, ascending=False)
-    result = {
-        'titles': titles[['title', 'country', 'release_year']].sort_values(by="release_year").to_dict(orient='records'),
-        'director collabs': director_collabs[director_collabs > 1].to_dict(),
-        'cast collabs': cast_collabs[cast_collabs > 1].to_dict()
-    }
-    return jsonify(result)
-
-
-@app.route('/stg/director/<name>')
-@cross_origin()
-def director_detail_stage(name):
-    titles = df[df.director.str.contains(name, na=False, case=False) == True]
     result = titles[['title', 'country', 'release_year']].sort_values(by="release_year")
     return jsonify(result.to_dict(orient='records'))
 

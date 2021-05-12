@@ -144,8 +144,10 @@ def cast_detail_director_collabs(name):
 @cross_origin()
 def cast_detail_cast_collabs(name):
     titles = df[df.cast.str.contains(name, na=False, case=False) == True]
-    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast[titles.cast.notnull()]])).value_counts(sort=True)
-    return Response(cast_collabs[cast_collabs > 1].to_json(), mimetype='application/json')
+    cast_collabs = Series(flatten_list([str(x).split(', ') for x in titles.cast[titles.cast.notnull()]]))
+    cast_collabs = cast_collabs[cast_collabs.str.contains(name, na=False, case=False) == False]
+    collab_count = cast_collabs.value_counts(sort=True)
+    return Response(collab_count[collab_count > 1].to_json(), mimetype='application/json')
 
 
 @app.route('/country/top10')

@@ -32,9 +32,9 @@ listed_in_counts = Series(flatten_list([x.split(', ') for x in df.listed_in.drop
 @cross_origin()
 def index():
     if 'order' in request.form and request.form['order'] == 'desc' and 'take' in request.form:
-        return df.sort_values(by="release_year").title[:request.form['take']].to_json(orient='records', force_ascii=False)
+        return df.sort_values(by="release_year").title[:request.form['take']].fillna("Unknown").to_json(orient='records', force_ascii=False)
     else:
-        return jsonify(df.to_dict(orient='records'))
+        return jsonify(df.fillna("Unknown").to_dict(orient='records'))
 
 
 @app.route('/searchterms/<term>')
@@ -127,6 +127,7 @@ def cast_top5():
 @cross_origin()
 def cast_detail_stage(name):
     titles = df[df.cast.str.contains(name, na=False, case=False) == True]
+    titles = titles.fillna("Unknown")
     result = titles[['title', 'country', 'release_year']].sort_values(by="release_year").to_dict(orient='records')
     return jsonify(result)
 

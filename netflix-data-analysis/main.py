@@ -28,6 +28,7 @@ ccast_counts = ccast.value_counts()
 countries_counts = Series(flatten_list([x.split(', ') for x in df.country.dropna()])).value_counts()
 listed_in_counts = Series(flatten_list([x.split(', ') for x in df.listed_in.dropna()])).value_counts()
 
+
 @app.route('/')
 @cross_origin()
 def index():
@@ -47,7 +48,11 @@ def search_terms_stg(term):
     cast_names = Series(flatten_list([x.split(', ') for x in df.cast.dropna()]))
     filtered_cast = cast_names[cast_names.str.contains(term, na=False, case=False) == True].unique()
     cast_terms = [{"term": x, "type": "cast"} for x in filtered_cast]
-    return jsonify(director_terms + cast_terms)
+
+    country_names = Series(flatten_list([x.split(', ') for x in df.country.dropna()]))
+    filtered_countries = country_names[country_names.str.contains(term, na=False, case=False) == True].unique()
+    country_terms = [{"term": x, "type": "country"} for x in filtered_countries]
+    return jsonify(director_terms + cast_terms + country_terms)
 
 
 @app.route('/movie')

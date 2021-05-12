@@ -151,7 +151,30 @@ def cast_detail_cast_collabs(name):
 @app.route('/country/top10')
 @cross_origin()
 def country_top5():
-    return countries_counts[:10].to_json(orient='columns', force_ascii=False)
+    return Response(countries_counts[:10].to_json(orient='columns', force_ascii=False), mimetype='application/json')
+
+
+@app.route('/country/<name>')
+@cross_origin()
+def country_detail(name):
+    titles = df[df.country.str.contains(name, case=False) == True]
+    titles_count = len(titles)
+
+    countrys_directors = Series(flatten_list([str(x).split(', ') for x in titles.director[titles.director.notnull()]]))
+    director_counts = countrys_directors.value_counts(sort=True)
+    top_directors = director_counts[director_counts > 1][:5].to_dict()
+
+    countrys_cast = Series(flatten_list([str(x).split(', ') for x in titles.cast[titles.cast.notnull()]]))
+    cast_counts = countrys_cast.value_counts(sort=True)
+    top_cast = cast_counts[cast_counts > 1][:5].to_dict()
+
+    result = {
+        'countryName': name,
+        'titleCount': titles_count,
+        'topDirectors': top_directors,
+        'topCast': top_cast
+    }
+    return jsonify(result)
 
 
 @app.route('/releaseyear/top10')

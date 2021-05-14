@@ -233,7 +233,7 @@ def country_detail(name):
         'titleCount': titles_count,
         'topDirectors': top_directors,
         'topCast': top_cast,
-        'byYearCount': [[x, int(count_by_year[x])] for x in count_by_year.keys()]
+        'byYearCount': [[str(x), int(count_by_year[x])] for x in count_by_year.keys()]
     }
     return jsonify(result)
 

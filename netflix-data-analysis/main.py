@@ -8,7 +8,6 @@ from pandas import DataFrame, Series
 from flask_cors import CORS, cross_origin
 import sys
 import math
-from collections import OrderedDict
 
 # Create the application.
 app = flask.Flask(__name__)
@@ -18,6 +17,18 @@ cors = CORS(app)
 
 def flatten_list(list):
     return [item for sublist in list for item in sublist]
+
+
+def director_per_year_count(name):
+    return df[df.director.str.contains(name, na=False, case=False) == True].groupby('release_year').count().title
+
+
+def cast_per_year_count(name):
+    return df[df.cast.str.contains(name, na=False, case=False) == True].groupby('release_year').count().title
+
+
+def country_per_year_count(name):
+    return df[df.country.str.contains(name, na=False, case=False) == True].groupby('release_year').count().title
 
 
 df = pd.read_csv('../data/netflix_titles.csv')
@@ -97,6 +108,17 @@ def director_top5():
     return director_counts[:5].to_json(orient='columns', force_ascii=False)
 
 
+@app.route('/director/top5/yearBreakdown')
+@cross_origin()
+def director_top5_year_breakdown():
+    top_5_directors = director_counts[:5]
+
+    def format_result(name):
+        return {'name': name, 'year_breakdown': director_per_year_count(name).to_dict()}
+
+    return jsonify([format_result(name) for name in top_5_directors.keys()])
+
+
 @app.route('/director/<name>')
 @cross_origin()
 def director_detail(name):
@@ -126,6 +148,17 @@ def director_detail_cast_collabs(name):
 @cross_origin()
 def cast_top5():
     return ccast_counts[:5].to_json(orient='columns', force_ascii=False)
+
+
+@app.route('/cast/top5/yearBreakdown')
+@cross_origin()
+def cast_top5_year_breakdown():
+    top_5_cast = ccast_counts[:5]
+
+    def format_result(name):
+        return {'name': name, 'year_breakdown': cast_per_year_count(name).to_dict()}
+
+    return jsonify([format_result(name) for name in top_5_cast.keys()])
 
 
 @app.route('/cast/<name>')
@@ -162,6 +195,23 @@ def country_top5():
     return Response(countries_counts[:10].to_json(orient='columns', force_ascii=False), mimetype='application/json')
 
 
+@app.route('/country/counts')
+@cross_origin()
+def country_counts():
+    result = [[x, int(countries_counts[x])] for x in countries_counts.keys()]
+    return jsonify(result)
+
+
+@app.route('/country/top5/yearBreakdown')
+@cross_origin()
+def country_top5_year_breakdown():
+    def format_result(name):
+        return {'name': name, 'counts': country_per_year_count(name).to_dict()}
+
+    result = [format_result(name) for name in countries_counts[:5].keys()]
+    return jsonify(result)
+
+
 @app.route('/country/<name>')
 @cross_origin()
 def country_detail(name):
@@ -169,8 +219,8 @@ def country_detail(name):
     titles_count = len(titles)
 
     countrys_directors = Series(flatten_list([str(x).split(', ') for x in titles.director[titles.director.notnull()]]))
-    director_counts = countrys_directors.value_counts(sort=True)
-    top_directors = director_counts[director_counts > 1][:5].to_dict()
+    country_director_counts = countrys_directors.value_counts(sort=True)
+    top_directors = country_director_counts[country_director_counts > 1][:5].to_dict()
 
     countrys_cast = Series(flatten_list([str(x).split(', ') for x in titles.cast[titles.cast.notnull()]]))
     cast_counts = countrys_cast.value_counts(sort=True)
@@ -180,7 +230,8 @@ def country_detail(name):
         'countryName': name,
         'titleCount': titles_count,
         'topDirectors': top_directors,
-        'topCast': top_cast
+        'topCast': top_cast,
+        'byYearCount': country_per_year_count(name).to_dict()
     }
     return jsonify(result)
 

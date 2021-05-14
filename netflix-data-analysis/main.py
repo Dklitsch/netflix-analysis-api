@@ -226,12 +226,14 @@ def country_detail(name):
     cast_counts = countrys_cast.value_counts(sort=True)
     top_cast = cast_counts[cast_counts > 1][:5].to_dict()
 
+    count_by_year = country_per_year_count(name)
+
     result = {
         'countryName': name,
         'titleCount': titles_count,
         'topDirectors': top_directors,
         'topCast': top_cast,
-        'byYearCount': country_per_year_count(name).to_dict()
+        'byYearCount': [[x, int(count_by_year[x])] for x in count_by_year.keys()]
     }
     return jsonify(result)
 

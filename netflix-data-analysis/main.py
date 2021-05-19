@@ -1,13 +1,16 @@
-import json
+import io
 
 import flask
-from flask import request, Response, jsonify
+from flask import request, Response, jsonify, send_file
 import pandas as pd
 import numpy as np
 from pandas import DataFrame, Series
 from flask_cors import CORS, cross_origin
 import sys
 import math
+import datetime
+from matplotlib.figure import Figure
+from io import StringIO
 
 # Create the application.
 app = flask.Flask(__name__)
@@ -232,10 +235,26 @@ def country_detail(name):
         'countryName': name,
         'titleCount': titles_count,
         'topDirectors': top_directors,
-        'topCast': top_cast,
-        'byYearCount': [[x, int(count_by_year[x])] for x in count_by_year.keys()]
+        'topCast': top_cast
     }
     return jsonify(result)
+
+
+@app.route('/releaseyear/yearchart.png')
+def country_detail_year_chart():
+    counts = df.release_year.value_counts().sort_index()
+    dates = [datetime.date(x, 1, 1) for x in counts.index]
+
+    fig = Figure()
+    ax = fig.subplots()
+    ax.plot(dates, counts)
+    ax.set_xlabel('Release Year')
+    ax.set_ylabel('Count')
+    ax.set_title("Releases by release year")
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", transparent=True)
+    buf.seek(0)
+    return send_file(buf, mimetype='image/png')
 
 
 @app.route('/releaseyear/top10')

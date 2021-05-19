@@ -1,6 +1,7 @@
 import io
 
 import flask
+import werkzeug
 from flask import request, Response, jsonify, send_file
 import pandas as pd
 import numpy as np
@@ -254,7 +255,7 @@ def country_detail_year_chart():
     buf = io.BytesIO()
     fig.savefig(buf, format="png", transparent=True)
     buf.seek(0)
-    return send_file(buf, mimetype='image/png')
+    return Response(werkzeug.wsgi.FileWrapper(buf), mimetype="image/png", direct_passthrough=True)
 
 
 @app.route('/releaseyear/top10')

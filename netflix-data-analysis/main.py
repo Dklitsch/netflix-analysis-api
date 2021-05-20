@@ -10,6 +10,7 @@ from flask_cors import CORS, cross_origin
 import sys
 import math
 import datetime
+from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 from io import StringIO
 
@@ -18,6 +19,8 @@ app = flask.Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 cors = CORS(app)
 
+plt.style.use('fivethirtyeight')
+plt.rcParams.update({'figure.autolayout': True})
 
 def flatten_list(list):
     return [item for sublist in list for item in sublist]
@@ -244,16 +247,17 @@ def country_detail(name):
 @app.route('/releaseyear/yearchart.png')
 def country_detail_year_chart():
     counts = df.release_year.value_counts().sort_index()
-    dates = [datetime.date(x, 1, 1) for x in counts.index]
 
     fig = Figure()
     ax = fig.subplots()
-    ax.plot(dates, counts)
+    ax.plot(counts.index, counts)
     ax.set_xlabel('Release Year')
     ax.set_ylabel('Count')
-    ax.set_title("Releases by release year")
+    ax.set_yticks([0, 200, 400, 600, 800, 1000, 1200])
+    ax.set_title('Releases by release year')
+
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", transparent=True)
+    fig.savefig(buf, format="png")
     buf.seek(0)
     return Response(werkzeug.wsgi.FileWrapper(buf), mimetype="image/png", direct_passthrough=True)
 

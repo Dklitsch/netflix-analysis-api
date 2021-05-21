@@ -244,8 +244,24 @@ def country_detail(name):
     return jsonify(result)
 
 
+@app.route('/country/<name>/yearchart.png')
+@cross_origin()
+def country_detail_year_chart(name):
+    counts = df[df.country.str.contains(name, na=False, case=False) == True].release_year.value_counts().sort_index()
+
+    fig = Figure()
+    ax = fig.subplots()
+    ax.plot(counts.index, counts)
+    ax.set(xlabel='Release Year', ylabel='Count', title='Releases by release year')
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
+    return Response(werkzeug.wsgi.FileWrapper(buf), mimetype="image/png", direct_passthrough=True)
+
+
 @app.route('/releaseyear/yearchart.png')
-def country_detail_year_chart():
+def release_year_year_chart():
     counts = df.release_year.value_counts().sort_index()
 
     fig = Figure()

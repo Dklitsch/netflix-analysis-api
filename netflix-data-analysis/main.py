@@ -10,9 +10,10 @@ from flask_cors import CORS, cross_origin
 import sys
 import math
 import datetime
-from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
+from matplotlib import pyplot as plt
 from io import StringIO
+import seaborn as sns
 
 # Create the application.
 app = flask.Flask(__name__)
@@ -166,6 +167,29 @@ def cast_top5_year_breakdown():
         return {'name': name, 'year_breakdown': cast_per_year_count(name).to_dict()}
 
     return jsonify([format_result(name) for name in top_5_cast.keys()])
+
+
+@app.route('/cast/top5/yearchart.png')
+@cross_origin()
+def cast_top5_year_chart():
+    top_5_cast = ccast_counts[:5]
+
+    def year_counts(cast_name):
+        titles_by_cast = df[df.cast.str.contains(cast_name) == True].groupby('release_year').count()
+        titles_by_cast['count'] = titles_by_cast['type']
+        titles_by_cast['name'] = cast_name
+        titles_by_cast['release_year'] = titles_by_cast.index
+        return titles_by_cast[['name', 'release_year', 'count']]
+
+    cast_year_counts = pd.concat([year_counts(x) for x in top_5_cast.index[:5]])
+    cast_plot = sns.relplot(data=cast_year_counts, x='release_year', y="count", hue="name", kind="line")
+
+    buf = io.BytesIO()
+    plt.rcParams['figure.figsize'] = [10, 5]
+    cast_plot.fig.savefig(buf, format="png")
+    buf.seek(0)
+    return Response(werkzeug.wsgi.FileWrapper(buf), mimetype="image/png", direct_passthrough=True)
+
 
 
 @app.route('/cast/<name>')

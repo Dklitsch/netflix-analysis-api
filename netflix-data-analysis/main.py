@@ -39,6 +39,14 @@ def country_per_year_count(name):
     return df[df.country.str.contains(name, na=False, case=False) == True].groupby('release_year').count().title
 
 
+def calculate_cast_year_counts(cast_name):
+    titles_by_cast = df[df.cast.str.contains(cast_name) == True].groupby('release_year').count()
+    titles_by_cast['count'] = titles_by_cast['type']
+    titles_by_cast['name'] = cast_name
+    titles_by_cast['release_year'] = titles_by_cast.index
+    return titles_by_cast[['name', 'release_year', 'count']]
+
+
 df = pd.read_csv('../data/netflix_titles.csv')
 type_counts = df['type'].value_counts()
 director_counts = Series(flatten_list([x.split(', ') for x in df.director.dropna()])).value_counts()
@@ -172,7 +180,7 @@ def cast_top5_year_breakdown():
 @app.route('/cast/top5/yearchart.png')
 @cross_origin()
 def cast_top5_year_chart():
-    top_5_cast = ccast_counts[:5]
+    top_5_cast = ccast_counts[:6]
 
     def year_counts(cast_name):
         titles_by_cast = df[df.cast.str.contains(cast_name) == True].groupby('release_year').count()
@@ -181,15 +189,39 @@ def cast_top5_year_chart():
         titles_by_cast['release_year'] = titles_by_cast.index
         return titles_by_cast[['name', 'release_year', 'count']]
 
-    cast_year_counts = pd.concat([year_counts(x) for x in top_5_cast.index[:5]])
+    cast_year_counts = pd.concat([year_counts(x) for x in top_5_cast.index[:6]])
     cast_plot = sns.relplot(data=cast_year_counts, x='release_year', y="count", hue="name", kind="line")
 
+    cast_plot.set_axis_labels("Year of release", "Number of titles released")
+    cast_plot.legend.set_title("Actor")
+    cast_plot.legend.set_bbox_to_anchor((1.2, .75))
+    cast_plot.fig.set_size_inches(12, 4)
+
+    cast_plot.set(xticks=[1982,1985,1990,1995,2000,2005,2010,2015,2020])
+
     buf = io.BytesIO()
-    plt.rcParams['figure.figsize'] = [10, 5]
-    cast_plot.fig.savefig(buf, format="png")
+    cast_plot.fig.savefig(buf, format="png", bbox_inches='tight')
     buf.seek(0)
     return Response(werkzeug.wsgi.FileWrapper(buf), mimetype="image/png", direct_passthrough=True)
 
+
+@app.route('/cast/top100/mean_releases_scatterplot.png')
+@cross_origin()
+def cast_top100_mean_releases_scatterplot():
+    top_100_cast = ccast_counts[:100]
+
+    cast_year_counts = pd.concat([calculate_cast_year_counts(x) for x in top_100_cast.index])
+    mean_releases = cast_year_counts.groupby('name').mean()
+    mean_releases["Total Releases"] = top_100_cast[mean_releases.index]
+    mean_releases = mean_releases.rename(columns={"count": "Average Releases"})
+
+    cast_plot = sns.relplot(data=mean_releases, x='Total Releases', y="Average Releases", legend=False)
+    cast_plot.fig.suptitle('Average titles per year vs total releases by actor')
+
+    buf = io.BytesIO()
+    cast_plot.fig.savefig(buf, format="png", bbox_inches='tight')
+    buf.seek(0)
+    return Response(werkzeug.wsgi.FileWrapper(buf), mimetype="image/png", direct_passthrough=True)
 
 
 @app.route('/cast/<name>')

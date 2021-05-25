@@ -213,7 +213,7 @@ def cast_top100_mean_releases_scatterplot():
     cast_year_counts = pd.concat([calculate_cast_year_counts(x) for x in top_100_cast.index])
     mean_releases = cast_year_counts.groupby('name').mean()
     mean_releases["Total number of titles"] = top_100_cast[mean_releases.index]
-    mean_releases = mean_releases.rename(columns={"count": "Average Releases"})
+    mean_releases = mean_releases.rename(columns={"count": "Average titles per year"})
 
     cast_plot = sns.relplot(data=mean_releases, x='Total number of titles', y="Average titles per year", legend=False)
     cast_plot.fig.suptitle('Average titles per year vs total titles by actor')

@@ -215,8 +215,8 @@ def cast_top100_mean_releases_scatterplot():
     mean_releases["Total Releases"] = top_100_cast[mean_releases.index]
     mean_releases = mean_releases.rename(columns={"count": "Average Releases"})
 
-    cast_plot = sns.relplot(data=mean_releases, x='Total Releases', y="Average Releases", legend=False)
-    cast_plot.fig.suptitle('Average titles per year vs total releases by actor')
+    cast_plot = sns.relplot(data=mean_releases, x='Total # of titles', y="Average titles per year", legend=False)
+    cast_plot.fig.suptitle('Average titles per year vs total titles by actor')
 
     buf = io.BytesIO()
     cast_plot.fig.savefig(buf, format="png", bbox_inches='tight')

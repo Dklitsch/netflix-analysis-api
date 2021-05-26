@@ -224,6 +224,25 @@ def cast_top100_mean_releases_scatterplot():
     return Response(werkzeug.wsgi.FileWrapper(buf), mimetype="image/png", direct_passthrough=True)
 
 
+@app.route('/cast/top100/years_active_scatterplot.png')
+@cross_origin()
+def cast_top100_years_active_scatterplot():
+    top_100_cast = ccast_counts[:100]
+
+    cast_year_counts = pd.concat([calculate_cast_year_counts(x) for x in top_100_cast.index])
+    years_active = cast_year_counts.groupby('name').count()
+    years_active["Total number of titles"] = top_100_cast[years_active.index]
+    years_active = years_active.rename(columns={"count": "Total Years Active"})
+
+    cast_plot = sns.relplot(data=years_active, x='Total number of titles', y="Total Years Active", legend=False)
+    cast_plot.fig.suptitle('Total years active vs total number of titles')
+
+    buf = io.BytesIO()
+    cast_plot.fig.savefig(buf, format="png", bbox_inches='tight')
+    buf.seek(0)
+    return Response(werkzeug.wsgi.FileWrapper(buf), mimetype="image/png", direct_passthrough=True)
+
+
 @app.route('/cast/<name>')
 @cross_origin()
 def cast_detail_stage(name):
@@ -288,8 +307,6 @@ def country_detail(name):
     countrys_cast = Series(flatten_list([str(x).split(', ') for x in titles.cast[titles.cast.notnull()]]))
     cast_counts = countrys_cast.value_counts(sort=True)
     top_cast = cast_counts[cast_counts > 1][:5].to_dict()
-
-    count_by_year = country_per_year_count(name)
 
     result = {
         'countryName': name,
